@@ -1,0 +1,46 @@
+vec4 hsv2rgb(vec3 c) {
+  vec3 rgb = clamp(abs(mod(c.x*6.+vec3(0.,4.,2.),6.)-3.)-1.,0.,1.);
+  rgb = rgb * rgb * (3.0 - 2.0 * rgb);
+  vec3 color = c.z * mix(vec3(1.0), rgb, c.y);
+   return vec4(color,1);
+}
+vec4 colormap(int i){
+    if(i==256){
+        return vec4(0,0,0,1);
+        }
+    //float grey =float(i)/256.0;
+    vec3 hsv=vec3(float(i)/256.0,1,1);
+    
+    //return vec4(grey,grey,grey,1);
+    return hsv2rgb(hsv);
+    
+}
+vec4 MandelbrotColor( float x0, float y0 )
+{
+    float x=0.0,y=0.0,xnew,ynew;
+    int i;
+    int imax = 256;
+    for (i=0;i<imax;i++) {
+      xnew = x * x - y * y + x0;
+      ynew = 2.0 * x * y + y0;
+      if (xnew*xnew + ynew*ynew > 4.0)
+         break;
+      x = xnew;
+      y = ynew;
+   }
+   return colormap(i);
+}
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    // Normalized pixel coordinates (from 0 to 1)
+    vec2 uv = fragCoord/iResolution.xy;
+    uv-=vec2(0.5,0.5);
+    uv.x *= iResolution.x/iResolution.y;
+    
+     float fac = pow(10.0,-iTime*0.2);
+    uv *= fac;
+    uv += vec2(-0.761574,-0.0847596);
+    
+    // Output to screen
+    fragColor = MandelbrotColor(uv.x,uv.y);
+}
